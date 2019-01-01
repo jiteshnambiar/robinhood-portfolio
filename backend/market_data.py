@@ -24,10 +24,12 @@ class MarketData:
         # get content
         content = rq.get(url=url, verify=False).content
         df = pd.read_csv(StringIO(content.decode('utf8')))
+        df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'},
+                  inplace=True)
         # check if empty - e.g. update existing over weekend
         try:
             df['Date'] = pd.to_datetime(df['Date'])
-            df.set_index('Date', inplace=True)
+            df.set_index('Date', inplace=True, drop=True)
         except:
             print('Warning: Market index data is empty!')
             None
@@ -38,7 +40,7 @@ class MarketData:
 
         # MorningStar provides a multiindex DF, so we need to convert it to
         # panelframe consistent with other routines
-        pf = web.DataReader(tickers, 'morningstar', start_date, end_date)
+        pf = web.DataReader(tickers, 'tiingo', start_date, end_date)
         pf = pf.to_panel()
         pf = pf.swapaxes(1, 2)
 
@@ -69,8 +71,9 @@ class MarketData:
             tickers,
             start_date.date(),
             end_date.date())
-        pf.loc[:, :, 'market'] = self._get_market_index(
+        market_data = self._get_market_index(
             start_date_str, end_date_str)
+        pf.loc[:, :, 'market'] = market_data
 
         if update_existing:
             new_dict = {}

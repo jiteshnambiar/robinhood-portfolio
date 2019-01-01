@@ -4,7 +4,7 @@ from pickle import dump, load
 from backend.portfolio_model import PortfolioModels
 from backend.robinhood_data import RobinhoodData
 from backend.market_data import MarketData
-
+from .excel_writer import ExcelWriter
 
 class BackendClass(object):
     """
@@ -421,6 +421,11 @@ class BackendClass(object):
             applymap(lambda x: color_values(x),
                      subset=['Alpha', 'Annual return', 'Sharpe ratio']).\
             render()
+
+        xls = ExcelWriter('risk_analysis')
+        xls.add_sheet('risk_analysis', df)
+        xls.save()
+
         return res
 
     def _get_portfolio_stats(self):

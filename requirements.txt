@@ -1,7 +1,6 @@
 numpy>=1.11.0
-pandas==0.20.3
 numexpr>=2.4.6
-pandas_datareader==0.6.0
+pandas_datareader==0.7.0
 tables
 requests
 seaborn
@@ -10,3 +9,4 @@ flask
 pyfolio==0.8.0
 git+https://github.com/quantopian/empyrical
 git+https://github.com/czielinski/portfolioopt
+XlsxWriter

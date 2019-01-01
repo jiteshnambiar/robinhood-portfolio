@@ -5,7 +5,7 @@ import pandas as pd
 import empyrical as emp
 import portfolioopt as pfopt
 from scipy import stats
-
+from .excel_writer import ExcelWriter
 
 # calculating portfolio performance
 class PortfolioModels():
@@ -140,10 +140,11 @@ class PortfolioModels():
         replace null stock prices using backfill to avoid issues with
         daily_change and beta calculations
         '''
-        close_price = pf['Close']
+        close_price = pf['close'] # pf['close_price']
         close_price.values[close_price.values == 0] = np.nan
         close_price.fillna(method='bfill', inplace=True)
         pf['Close'] = close_price
+        pf['Open'] = pf['open']
 
         self.panelframe = pf
         return self
@@ -250,6 +251,14 @@ class PortfolioModels():
             returns_corr,
             columns=returns_mean.keys(),
             index=returns_mean.keys())
+
+        xls = ExcelWriter('correlation')
+        xls.add_sheet('corr', df_corr)
+        xls.default_formatting('corr')
+
+        xls.add_sheet('covar', df_covar)
+        xls.default_formatting('covar')
+        xls.save()
 
         return df_corr, df_covar
 

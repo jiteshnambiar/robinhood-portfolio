@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'My_l0ng_very_secure_secret_k3y'
 app.config['DEBUG'] = False
 app.config['TESTING'] = False
-
+market_data = ''
 
 def plot_returns(data):
     # Set up the matplotlib figure
@@ -122,4 +122,7 @@ def portfolio():
 if __name__ == '__main__':
     PORT = int(os.getenv('PORT', 8080))
     HOST = os.getenv('HOST', '0.0.0.0')
+    # Morning star API no longer works, switching to an alternate working API
+    os.environ['QUANDL_API_KEY'] = '' # get API key from https://www.quandl.com/tools/api
+    os.environ['TIINGO_API_KEY'] = '' # get API key from https://api.tiingo.com/
     app.run(debug=True, host=HOST, port=PORT)

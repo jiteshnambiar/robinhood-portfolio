@@ -1,12 +1,15 @@
 import getpass
 import json
+import urllib
+
 import requests
 
 
 class RobinhoodAPI:
 
     endpoints = {
-        "login": "https://api.robinhood.com/api-token-auth/",
+        #"login": "https://api.robinhood.com/api-token-auth/",
+        "login": "https://api.robinhood.com/oauth2/token/",
         "investment_profile": "https://api.robinhood.com/user/investment_profile/",
         "accounts": "https://api.robinhood.com/accounts/",
         "ach_iav_auth": "https://api.robinhood.com/ach/iav/auth/",
@@ -48,6 +51,10 @@ class RobinhoodAPI:
 
     def __init__(self):
         self.session = requests.session()
+        try:
+            self.session.proxies = urllib.getproxies()  # py2
+        except:
+            self.session.proxies = urllib.request.getproxies()  # py3
         self.headers = {
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate",
@@ -65,17 +72,42 @@ class RobinhoodAPI:
         password = getpass.getpass()
         return self.login(username=username, password=password)
 
-    def login(self, username, password):
+    def login(self, username, password, mfa_code=None):
         self.username = username
         self.password = password
-        data = {"password": self.password, "username": self.username}
+        self.mfa_code = mfa_code
+        # fields = { 'password' : self.password, 'username' : self.username, 'mfa_code': self.mfa_code }
+        # fields = { 'password' : self.password, 'username' : self.username }
+
+        if mfa_code:
+            fields = {'client_id': 'c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS',
+                      'expires_in': 86400,
+                      'grant_type': 'password',
+                      'password': self.password,
+                      'scope': 'internal',
+                      'username': self.username,
+                      'mfa_code': self.mfa_code}
+        else:
+            fields = {'client_id': 'c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS',
+                      'expires_in': 86400,
+                      'grant_type': 'password',
+                      'password': self.password,
+                      'scope': 'internal',
+                      'username': self.username}
+        try:
+            data = urllib.urlencode(fields)  # py2
+        except:
+            data = urllib.parse.urlencode(fields)  # py3
+
         res = self.session.post(self.endpoints['login'], data=data)
         res = res.json()
         try:
-            self.auth_token = res['token']
+            # self.auth_token = res['token']
+            self.auth_token = res['access_token']
         except KeyError:
-            return False
-        self.headers['Authorization'] = 'Token '+self.auth_token
+            return res
+        # self.headers['Authorization'] = 'Token '+self.auth_token
+        self.headers['Authorization'] = 'Bearer ' + self.auth_token
         return True
 
     ##############################

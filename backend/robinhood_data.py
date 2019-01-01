@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-from pandas.core.tools.datetimes import normalize_date
+# from pandas.core.tools.datetimes import normalize_date
+from pandas._libs import tslib
 from backend.robinhood_api import RobinhoodAPI
 
 
@@ -89,7 +90,7 @@ class RobinhoodData:
 
         # add days
         df['date'] = df['created_at'].apply(
-            lambda x: normalize_date(x))
+            lambda x: tslib.normalize_date(x))
 
         # rename columns for consistency
         df.rename(columns={
@@ -117,7 +118,7 @@ class RobinhoodData:
 
         # add days
         df['date'] = df['paid_at'].apply(
-            lambda x: normalize_date(x))
+            lambda x: tslib.normalize_date(x))
         return df
 
     def _generate_positions(self, df_ord):
